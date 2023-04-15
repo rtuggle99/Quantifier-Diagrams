@@ -132,6 +132,86 @@ function plotHiddenTruthVals(data,gridnumber,exprnum)
 	return marks
 end
 
+# ╔═╡ 6021134f-f508-4c9b-ba84-e048ba6a5cba
+function plotDominatingLines(data,gridnumber,exprnum,width,height,shapeWidth,xbuffer,ybuffer,xtick,ytick,xspaceBefore,yspaceAfter,upperBuffer)
+	marks = []
+	for i in 1:size(data[:y])[1]
+			cx = xbuffer + xspaceBefore + shapeWidth*(i - 1)
+			cy = height - ybuffer - yspaceAfter - shapeWidth*(data[:y][i])
+			normdom = @htl("""<polyline id="normalDom $exprnum,$gridnumber,$(i-1)" points="$(xbuffer),$(cy) $(cx),$(cy) $(cx),$(height - ybuffer)" style="visibility:hidden; fill:none; stroke:black; stroke-width:3" />""")
+			invdom = @htl("""<polyline id="invDom $exprnum,$gridnumber,$(i-1)" points="$(width-xbuffer),$(cy) $(cx),$(cy) $(cx),$(upperBuffer)" style="visibility:hidden; fill:none; stroke:black; stroke-width:3" />""")
+	
+			append!(marks,[normdom])
+			append!(marks,[invdom])
+	end
+	return marks
+end
+
+# ╔═╡ e6726386-5c9d-4f08-9ec9-e78fa108e39b
+function plotHiddenXsandChecks(data,gridnumber,exprnum,width,height,shapeWidth,xbuffer,ybuffer,xtick,ytick,xspaceBefore,yspaceAfter)
+	marks = []
+	for i in 1:size(data[:y])[1]
+			cx = xbuffer + xspaceBefore - shapeWidth/2 + shapeWidth*(i - 1)
+			cy = height - ybuffer - yspaceAfter - shapeWidth*(data[:y][i])
+			scale = .8
+
+			placeholder = @htl("""<circle  id="placeholder $exprnum,$gridnumber,$(i-1)" cx=$(cx) cy=$(cy) r=5 style=" visibility:hidden; fill: cyan; stroke:cyan; stroke-width:0"/>""")
+
+
+			check = @htl("""<polygon id="checkmark $exprnum,$gridnumber,$(i-1)" points="$(cx) $(cy),$(cx-scale*5) $(cy-scale*5),$(cx-scale*10) $(cy),$(cx) $(cy+scale*10),$(cx+scale*15) $(cy-scale*15),$(cx+scale*10) $(cy-scale*20)"  style=" visibility:hidden; fill: lightgreen; stroke:green; stroke-width:1"/>""")
+		
+
+			x = @htl("""<polygon  id="x $exprnum,$gridnumber,$(i-1)" points="$(cx) $(cy-scale*5),$(cx+scale*5) $(cy-scale*12),$(cx+scale*12) $(cy-scale*5),$(cx+scale*5) $(cy),$(cx+scale*12) $(cy+scale*5),$(cx+scale*5) $(cy+scale*12),$(cx) $(cy+scale*5),$(cx-scale*5) $(cy+scale*12),$(cx-scale*12) $(cy+scale*5),$(cx-scale*5) $(cy),$(cx-scale*12) $(cy-scale*5),$(cx-scale*5) $(cy-scale*12)" style=" visibility:hidden; fill: red; stroke:maroon; stroke-width:1"/>""")
+
+			cx = cx + shapeWidth
+			scale = .5
+			smallCheck = @htl("""<polygon id="smallcheckmark $exprnum,$gridnumber,$(i-1)" points="$(cx) $(cy),$(cx-scale*5) $(cy-scale*5),$(cx-scale*10) $(cy),$(cx) $(cy+scale*10),$(cx+scale*15) $(cy-scale*15),$(cx+scale*10) $(cy-scale*20)" style=" visibility:hidden; fill: lightgreen; stroke:green; stroke-width:1"/>""")
+
+			smallx = @htl("""<polygon id="smallx $exprnum,$gridnumber,$(i-1)" points="$(cx) $(cy-scale*5),$(cx+scale*5) $(cy-scale*12),$(cx+scale*12) $(cy-scale*5),$(cx+scale*5) $(cy),$(cx+scale*12) $(cy+scale*5),$(cx+scale*5) $(cy+scale*12),$(cx) $(cy+scale*5),$(cx-scale*5) $(cy+scale*12),$(cx-scale*12) $(cy+scale*5),$(cx-scale*5) $(cy),$(cx-scale*12) $(cy-scale*5),$(cx-scale*5) $(cy-scale*12)" style=" visibility:hidden; fill: red; stroke:maroon; stroke-width:1"/>""")
+
+		
+			append!(marks,[check])
+			append!(marks,[smallCheck])
+			append!(marks,[x])
+			append!(marks,[smallx])
+			append!(marks,[placeholder])
+	end
+	cx = 100
+	cy = 20
+	scale=1
+	bigCheck = @htl("""<polygon id="bigcheckmark $exprnum,$gridnumber" points="$(cx) $(cy),$(cx-scale*5) $(cy-scale*5),$(cx-scale*10) $(cy),$(cx) $(cy+scale*10),$(cx+scale*15) $(cy-scale*15),$(cx+scale*10) $(cy-scale*20)"  style=" visibility:hidden; fill: lightgreen; stroke:green; stroke-width:1"/>""")
+
+	bigX = @htl("""<polygon  id="bigx $exprnum,$gridnumber" points="$(cx) $(cy-scale*5),$(cx+scale*5) $(cy-scale*12),$(cx+scale*12) $(cy-scale*5),$(cx+scale*5) $(cy),$(cx+scale*12) $(cy+scale*5),$(cx+scale*5) $(cy+scale*12),$(cx) $(cy+scale*5),$(cx-scale*5) $(cy+scale*12),$(cx-scale*12) $(cy+scale*5),$(cx-scale*5) $(cy),$(cx-scale*12) $(cy-scale*5),$(cx-scale*5) $(cy-scale*12)" style=" visibility:hidden; fill: red; stroke:maroon; stroke-width:1"/>""")
+
+	append!(marks,[bigCheck])
+	append!(marks,[bigX])
+	return marks
+end
+
+# ╔═╡ 3f52af75-c390-4423-9b52-a52c81791c92
+function plotPoints(data,gridnumber,exprnum,width,height,shapeWidth,xbuffer,ybuffer,xtick,ytick,xspaceBefore,yspaceAfter)
+	dots = []
+	for i in 1:size(data[:y])[1]
+			cx = xbuffer + xspaceBefore + shapeWidth*(i - 1)
+			cy = height - ybuffer - yspaceAfter - shapeWidth*(data[:y][i])
+			shape = data[:marker][i]
+			color = data[:fcolor][i]
+
+			if shape == "d"
+				dot = @htl("""<polygon id="$exprnum,$gridnumber,$(i-1),$(data[:y][i]),d" points="$(cx) $(cy-15),$(cx+10) $(cy),$(cx) $(cy+15),$(cx-10) $(cy)" onmouseleave = clearTruthVals(event) onMouseOver = putCheckorX(event) onClick = putCheckorX(event) style=" fill: $(color); stroke:black; stroke-width:2"/>""")
+			elseif shape == "o"
+				dot = @htl("""<circle id="$exprnum,$gridnumber,$(i-1),$(data[:y][i]),o" cx=$(cx) cy=$(cy) r=10 onmouseleave = clearTruthVals(event) onMouseOver = putCheckorX(event) onClick = putCheckorX(event) style=" fill:$(color); stroke:black; stroke-width:2" />""")
+			elseif (shape == "x") || (shape == "X")
+				dot = @htl("""<polygon id="$exprnum,$gridnumber,$(i-1),$(data[:y][i]),X" points="$(cx) $(cy-5),$(cx+5) $(cy-10),$(cx+10) $(cy-5),$(cx+5) $(cy),$(cx+10) $(cy+5),$(cx+5) $(cy+10),$(cx) $(cy+5),$(cx-5) $(cy+10),$(cx-10) $(cy+5),$(cx-5) $(cy),$(cx-10) $(cy-5),$(cx-5) $(cy-10)" onmouseleave = clearTruthVals(event) onMouseOver = putCheckorX(event) onClick = putCheckorX(event) style=" fill:$(color); stroke:black; stroke-width:2"/>""")
+			else
+				dot = "error"
+				@assert(false)
+			end
+			append!(dots,[dot])
+	end
+	return dots
+end
+
 # ╔═╡ 0606bc8c-5132-4b17-8348-2b0358650041
 ##this function makes the assumption that there are at most five grids
 htl"""
@@ -681,16 +761,12 @@ function removeItemOnce(arr, value) {
 
 # ╔═╡ 592b0ca4-213b-41ab-8edf-1569ddd62ae8
 begin
-	data1 = Dict(:y=>[1,4,6,0,3,7],:marker=>["o","o","o","o","o","o"],:fcolor=>["white","white","white","white","white","white"])
+	data1 = Dict(:y=>[1,4,6,0,3,7],:marker=>["o","o","o","o","o","o","d"],:fcolor=>["white","white","white","white","white","white","skyblue"])
 	data2 = Dict(:y=>[1,4,6,0,3,7],:marker=>["d","d","d","d","d","d"],:fcolor=>["black","black","white","black","black","black"])
 	data3 = Dict(:y=>[1,4,6,0,3,7],:marker=>["d","d","o","d","d","o"],:fcolor=>["black","black","black","black","black","black"])
 	data4 = Dict(:y=>[1,4,6,0,3,7],:marker=>["o","o","d","d","o","d"],:fcolor=>["white","white","white","white","white","white"])
 	data5 = Dict(:y=>[1,4,6,0,3,7],:marker=>["o","o","d","d","o","d"],:fcolor=>["white","black","white","black","white","white"])
 	data = [data1,data2,data3,data4,data5]
-	buffer = 40
-	shapeWidth = 20
-	width = buffer + shapeWidth*7 + buffer
-	height = buffer + shapeWidth * 12 + buffer
 end
 
 # ╔═╡ 3e3c456e-8c13-4a0f-bf9c-e77de553d526
@@ -698,110 +774,31 @@ function findNextMult3(n)
 	return n + (3 - mod(n,3)) + 3
 end
 
-# ╔═╡ 6021134f-f508-4c9b-ba84-e048ba6a5cba
-function plotDominatingLines(data,gridnumber,exprnum,width,height,shapeWidth,xbuffer,ybuffer,xtick,ytick)
-	marks = []
-	for i in 1:size(data[:y])[1]
-			cx = xbuffer + shapeWidth*(i - 1)
-			cy = ybuffer + shapeWidth*(findNextMult3(ytick) - data[:y][i])
-			normdom = @htl("""<polyline id="normalDom $exprnum,$gridnumber,$(i-1)" points="20,$(cy) $(cx),$(cy) $(cx),$(40 + height - 60)" style="visibility:hidden; fill:none; stroke:black; stroke-width:3" />""")
-			invdom = @htl("""<polyline id="invDom $exprnum,$gridnumber,$(i-1)" points="$(shapeWidth + width - 60),$(cy) $(cx),$(cy) $(cx),40" style="visibility:hidden; fill:none; stroke:black; stroke-width:3" />""")
-	
-			append!(marks,[normdom])
-			append!(marks,[invdom])
-	end
-	return marks
-end
-
-# ╔═╡ e6726386-5c9d-4f08-9ec9-e78fa108e39b
-function plotHiddenXsandChecks(data,gridnumber,exprnum,width,height,shapeWidth,xbuffer,ybuffer,xtick,ytick)
-	marks = []
-	for i in 1:size(data[:y])[1]
-			cx = xbuffer - 10 + shapeWidth*(i - 1)
-			cy = ybuffer + shapeWidth*(findNextMult3(ytick) - data[:y][i])
-			scale = .8
-
-			placeholder = @htl("""<circle  id="placeholder $exprnum,$gridnumber,$(i-1)" cx=$(cx) cy=$(cy) r=5 style=" visibility:hidden; fill: cyan; stroke:cyan; stroke-width:0"/>""")
-
-
-			check = @htl("""<polygon id="checkmark $exprnum,$gridnumber,$(i-1)" points="$(cx) $(cy),$(cx-scale*5) $(cy-scale*5),$(cx-scale*10) $(cy),$(cx) $(cy+scale*10),$(cx+scale*15) $(cy-scale*15),$(cx+scale*10) $(cy-scale*20)"  style=" visibility:hidden; fill: lightgreen; stroke:green; stroke-width:1"/>""")
-		
-
-			x = @htl("""<polygon  id="x $exprnum,$gridnumber,$(i-1)" points="$(cx) $(cy-scale*5),$(cx+scale*5) $(cy-scale*12),$(cx+scale*12) $(cy-scale*5),$(cx+scale*5) $(cy),$(cx+scale*12) $(cy+scale*5),$(cx+scale*5) $(cy+scale*12),$(cx) $(cy+scale*5),$(cx-scale*5) $(cy+scale*12),$(cx-scale*12) $(cy+scale*5),$(cx-scale*5) $(cy),$(cx-scale*12) $(cy-scale*5),$(cx-scale*5) $(cy-scale*12)" style=" visibility:hidden; fill: red; stroke:maroon; stroke-width:1"/>""")
-
-			cx = 50 + 20*(i - 1)
-			scale = .5
-			smallCheck = @htl("""<polygon id="smallcheckmark $exprnum,$gridnumber,$(i-1)" points="$(cx) $(cy),$(cx-scale*5) $(cy-scale*5),$(cx-scale*10) $(cy),$(cx) $(cy+scale*10),$(cx+scale*15) $(cy-scale*15),$(cx+scale*10) $(cy-scale*20)" style=" visibility:hidden; fill: lightgreen; stroke:green; stroke-width:1"/>""")
-
-			smallx = @htl("""<polygon id="smallx $exprnum,$gridnumber,$(i-1)" points="$(cx) $(cy-scale*5),$(cx+scale*5) $(cy-scale*12),$(cx+scale*12) $(cy-scale*5),$(cx+scale*5) $(cy),$(cx+scale*12) $(cy+scale*5),$(cx+scale*5) $(cy+scale*12),$(cx) $(cy+scale*5),$(cx-scale*5) $(cy+scale*12),$(cx-scale*12) $(cy+scale*5),$(cx-scale*5) $(cy),$(cx-scale*12) $(cy-scale*5),$(cx-scale*5) $(cy-scale*12)" style=" visibility:hidden; fill: red; stroke:maroon; stroke-width:1"/>""")
-
-		
-			append!(marks,[check])
-			append!(marks,[smallCheck])
-			append!(marks,[x])
-			append!(marks,[smallx])
-			append!(marks,[placeholder])
-	end
-	cx = 100
-	cy = 20
-	scale=1
-	bigCheck = @htl("""<polygon id="bigcheckmark $exprnum,$gridnumber" points="$(cx) $(cy),$(cx-scale*5) $(cy-scale*5),$(cx-scale*10) $(cy),$(cx) $(cy+scale*10),$(cx+scale*15) $(cy-scale*15),$(cx+scale*10) $(cy-scale*20)"  style=" visibility:hidden; fill: lightgreen; stroke:green; stroke-width:1"/>""")
-
-	bigX = @htl("""<polygon  id="bigx $exprnum,$gridnumber" points="$(cx) $(cy-scale*5),$(cx+scale*5) $(cy-scale*12),$(cx+scale*12) $(cy-scale*5),$(cx+scale*5) $(cy),$(cx+scale*12) $(cy+scale*5),$(cx+scale*5) $(cy+scale*12),$(cx) $(cy+scale*5),$(cx-scale*5) $(cy+scale*12),$(cx-scale*12) $(cy+scale*5),$(cx-scale*5) $(cy),$(cx-scale*12) $(cy-scale*5),$(cx-scale*5) $(cy-scale*12)" style=" visibility:hidden; fill: red; stroke:maroon; stroke-width:1"/>""")
-
-	append!(marks,[bigCheck])
-	append!(marks,[bigX])
-	return marks
-end
-
-# ╔═╡ 3f52af75-c390-4423-9b52-a52c81791c92
-function plotPoints(data,gridnumber,exprnum,width,height,shapeWidth,xbuffer,ybuffer,xtick,ytick)
-	dots = []
-	for i in 1:size(data[:y])[1]
-			cx = xbuffer + shapeWidth*(i - 1)
-			cy = ybuffer + shapeWidth*(findNextMult3(ytick) - data[:y][i])
-			shape = data[:marker][i]
-			color = data[:fcolor][i]
-			#"""<td><button onclick="toggleColumn(this);">$(data.y)</button></td>"""
-
-			if shape == "d"
-				dot = @htl("""<polygon id="$exprnum,$gridnumber,$(i-1),$(data[:y][i]),d" points="$(cx) $(cy-15),$(cx+10) $(cy),$(cx) $(cy+15),$(cx-10) $(cy)" onmouseleave = clearTruthVals(event) onMouseOver = putCheckorX(event) onClick = putCheckorX(event) style=" fill: $(color); stroke:black; stroke-width:2"/>""")
-			elseif shape == "o"
-				dot = @htl("""<circle id="$exprnum,$gridnumber,$(i-1),$(data[:y][i]),o" cx=$(cx) cy=$(cy) r=10 onmouseleave = clearTruthVals(event) onMouseOver = putCheckorX(event) onClick = putCheckorX(event) style=" fill:$(color); stroke:black; stroke-width:2" />""")
-			elseif (shape == "x") || (shape == "X")
-				dot = @htl("""<polygon id="$exprnum,$gridnumber,$(i-1),$(data[:y][i]),X" points="$(cx) $(cy-5),$(cx+5) $(cy-10),$(cx+10) $(cy-5),$(cx+5) $(cy),$(cx+10) $(cy+5),$(cx+5) $(cy+10),$(cx) $(cy+5),$(cx-5) $(cy+10),$(cx-10) $(cy+5),$(cx-5) $(cy),$(cx-10) $(cy-5),$(cx-5) $(cy-10)" onmouseleave = clearTruthVals(event) onMouseOver = putCheckorX(event) onClick = putCheckorX(event) style=" fill:$(color); stroke:black; stroke-width:2"/>""")
-			else
-				dot = "error"
-				@assert(false)
-			end
-			append!(dots,[dot])
-	end
-	return dots
-end
-
 # ╔═╡ bf80d570-db90-4e25-837e-53df9f069b74
-function plotGrid(width,height,shapeWidth,xbuffer,ybuffer,xtick,ytick,upperBuffer)
+function plotGrid(width,height,shapeWidth,xbuffer,ybuffer,xShapes,yShapes,upperBuffer,xspaceBefore,xspaceAfter,yspaceBefore,yspaceAfter,xrange,yrange)
 	letterHeight = 4.25
 	letterWidth= 4
-	maxHorVal = Int((findNextMult3(ytick))/3)
+	maxHorVal = Int(findNextMult3(yShapes)/3)
 	horizontalLines = []
-
+	if (mod(yShapes,3) != 0) 
+		maxHorVal = maxHorVal + 1
+	end
 	for i in 1:maxHorVal
-	append!(horizontalLines,[@htl("""<text x="5" y="$(height  - ybuffer + letterHeight - shapeWidth*3(i-1))">$(3*(i - 1)) </text>""")])
-	append!(horizontalLines,[@htl("""<line x1="20" y1="$(height  - upperBuffer - shapeWidth*3*(i-1))" x2="$(20 + width - 60)" y2="$(height - upperBuffer - shapeWidth*3*(i-1))" stroke="gray" />""")])
+	append!(horizontalLines,[@htl("""<text x="$(xbuffer - 4*letterWidth)" y="$(height - ybuffer - yspaceAfter + letterHeight - shapeWidth*3(i-1))">$(3*(i - 1)) </text>""")])
+	append!(horizontalLines,[@htl("""<line x1="$xbuffer" y1="$(height - ybuffer - yspaceAfter - shapeWidth*3(i-1))" x2="$(width - xbuffer)" y2="$(height - ybuffer - yspaceAfter - shapeWidth*3(i-1))" stroke="gray" />""")])
 	end
 
 	verticalLines = []
-	maxVertVal = Int(findNextMult3(xtick)/3)
-	if (mod(xtick,3) != 2) 
-		maxVertVal = maxVertVal - 1
+	maxVertVal = Int(findNextMult3(xShapes)/3)-1
+	if (mod(xShapes,3) != 0) 
+		maxVertVal = maxVertVal + 1
 	end
 	for i in 1:maxVertVal
-		append!(verticalLines,[@htl("""<text x="$(xbuffer-letterWidth  + 3(i-1)*shapeWidth)" y="$(height + 2 + 2*letterHeight - 15)">$(3*(i-1))</text>""")])
-		append!(verticalLines,[@htl("""<line x1="$(xbuffer + 3*(i-1)*shapeWidth)" y1="40" x2="$(xbuffer + 3*(i-1)*shapeWidth)" y2="$(ybuffer + height - 60)" stroke="gray" />""")])
+		append!(verticalLines,[@htl("""<text x="$(xbuffer + xspaceBefore - letterWidth  + 3(i-1)*shapeWidth)" y="$(height - ybuffer + 2 + 2*letterHeight )">$(3*(i-1))</text>""")])
+		append!(verticalLines,[@htl("""<line x1="$(xbuffer + xspaceBefore + 3*(i-1)*shapeWidth)" y1="$upperBuffer" x2="$(xbuffer + xspaceBefore + 3*(i-1)*shapeWidth)" y2="$(height - ybuffer)" stroke="gray" />""")])
 	end
 	grid = @htl("""
-    <rect x=$(shapeWidth) y = $(upperBuffer) width=$(width - 60) height=$(height - 60) fill="white" stroke="black" /> 
+    <rect x=$(xbuffer) y = $(upperBuffer) width=$(xspaceBefore + xrange + xspaceAfter) height=$(yspaceBefore + yrange + yspaceAfter) fill="white" stroke="black" /> 
 	$([a for a in horizontalLines])
 	$([a for a in verticalLines])
 
@@ -812,50 +809,74 @@ function plotGrid(width,height,shapeWidth,xbuffer,ybuffer,xtick,ytick,upperBuffe
 end
 
 # ╔═╡ e1b9d106-0c86-4530-9a13-d5d01502026e
-function genHTML(data,width,height,exprnum,grids=5)
+function genHTML(data,exprnum)
 	ans = []
-	for i in 1:grids
+	for i in 1:size(data)[1]
 		##x buffer is how many pixels are to the left of the grid in the grid svg
 		##x buffer is also how many pixels are to the right of the grid in the grid svg
 		xbuffer = 40
 		##y buffer is how many pixels are below the grid in the grid svg
 		ybuffer = 40	
 		##upperBuffer is how many pixels are above the grid in the grid svg
-		upperBuffer = 40
-		##shape width is approximately how tall the average shape is
+		upperBuffer = 80
+		##shape width is approximately how wide the average shape is
 		shapeWidth = 20
-		##maxx is the biggest x value that we have in our data.  It helps decide how wide to make the grid
+		##yspaceBefore is the distance between the top edge of the grid and the top horizontal line inside the grid
+		yspaceBefore = 0
+		##yspaceBefore is the distance between the bottom edge of the grid and the bottom horizontal line inside the grid
+		yspaceAfter = shapeWidth
+		##xspaceBefore is the distance between the left edge of the grid and the leftmost vertical line inside the grid
+		xspaceBefore = shapeWidth
+		##xspaceAfter is the distance between the right edge of the grid and the rightmost vertical line inside the grid
+		xspaceAfter = shapeWidth
+		##maxx is the biggest x value that we have in our data
 		maxx = size(data[i][:y])[1] - 1
-		##maxy is the biggest y value that we have in our data.  It helps decide how tall to make the grid
+
+		if (mod(maxx,3) == 0)
+			extraXshapes = mod(maxx,3)
+		else
+			extraXshapes = 3-mod(maxx,3)
+		end
+		##xrange is the distance from the leftmost vertical line inside the grid to the rightmost vertical line inside the grid
+		xrange = (maxx + extraXshapes)*(shapeWidth)
+		
+		##maxy is the biggest y value that we have in our data
 		maxy = maximum(data[i][:y])
 
+		if (mod(maxy,3) == 0)
+			extraYshapes = 3-mod(maxy,3)
+		else
+			extraYshapes = 3*2-mod(maxy,3)
+		end
+		##yrange is the distance from the topmost horizontal line inside the grid to the bottommost horizontal line inside the grid
+		yrange = (maxy + extraYshapes)*shapeWidth
+		
 		##width of a grid
-		##explanation: the whole width is the space before the grid (xbuffer) plus the width of all the shapes (shapewidth*maxx) plus room for two extra shapes (2*shapewidth) plus the space after the grid (xbuffer)
-		width = xbuffer + shapeWidth*(maxx + 2) + xbuffer
+		##explanation: the whole width is the space before the grid (xbuffer) plus the white space inside the grid but before the first vertical line (xspaceBefore) plus the width needed to fit all the shapes (xrange) plus the white space after the last vertical line and before the edge (xspaceAfter) plus the space after the grid (xbuffer)
+		width = xbuffer + xspaceBefore + xrange + xspaceAfter + xbuffer
 		##height of a grid
-		##explanation: the whole height is the space above the grid (upperBuffer) plus the height of all the shapes (shapewidth*maxy) plus room for two extra shapes (2*shapewidth) plus the space below the grid (ybuffer)
-		height = upperBuffer + shapeWidth * (findNextMult3(maxy)) + ybuffer
-		#height = upperBuffer + shapeWidth * (maxy + 2) + ybuffer
+		##explanation: analagous to width
+		height = upperBuffer + yspaceBefore + yrange + yspaceAfter + ybuffer
 
 		##the svgs for the data points
-		bigDots = plotPoints(data[i],i,exprnum,width,height,shapeWidth,xbuffer,ybuffer,maxx,maxy)
+		bigDots = plotPoints(data[i],i,exprnum,width,height,shapeWidth,xbuffer,ybuffer,maxx,maxy,xspaceBefore,yspaceAfter)
 		##the svgs for the checks and x's corresponding to each data point, as well as the check and x above the grid
-		checksx = plotHiddenXsandChecks(data[i],i,exprnum,width,height,shapeWidth,xbuffer,ybuffer,maxx,maxy)
+		checksx = plotHiddenXsandChecks(data[i],i,exprnum,width,height,shapeWidth,xbuffer,ybuffer,maxx,maxy,xspaceBefore,yspaceAfter)
 		##the svgs for the big and little trues and falses above the grid
 		TFs = plotHiddenTruthVals(data[i],i,exprnum)
 		##the svgs for the dominating lines corresponding to each data point
-		dom = plotDominatingLines(data[i],i,exprnum,width,height,shapeWidth,xbuffer,ybuffer,maxx,maxy)
+		dom = plotDominatingLines(data[i],i,exprnum,width,height,shapeWidth,xbuffer,ybuffer,maxx,maxy,xspaceBefore,yspaceAfter,upperBuffer)
 		##the grid itself with axes and labels
-		grid = plotGrid(width,height,shapeWidth,xbuffer,ybuffer,maxx,maxy,upperBuffer)
+		grid = plotGrid(width,height,shapeWidth,xbuffer,ybuffer,maxx,maxy,upperBuffer,xspaceBefore,xspaceAfter,yspaceBefore,yspaceAfter,xrange,yrange)
 
 		##the svg putting everything for a single grid together
-		temp = [@htl("""<svg width=$(width) height=$(height)>
-	$(grid)
-	$([f for f in dom])
-	$([f for f in bigDots])
-	$([f for f in checksx])
-	$([f for f in TFs])
-	</svg>""")]
+		temp = [@htl("""<svg width=$(width) height=$(height + upperBuffer)>
+				$(grid)
+				$([f for f in dom])
+				$([f for f in bigDots])
+				$([f for f in checksx])
+				$([f for f in TFs])
+				</svg>""")]
 		append!(ans, temp)
 	end
 ##all the svgs for all the grids for a given expression
@@ -868,84 +889,84 @@ $([a for a in ans])
 
 # ╔═╡ ebdf845c-ed6c-4e81-8daf-b546c2b76e75
 htl"""
-	$(genHTML(data,width,height,0))
+	$(genHTML(data,0))
 	"""
 
 # ╔═╡ efc174e1-9e24-4071-aa4d-1763be219128
 htl"""
-	$(genHTML(data,width,height,1))
+	$(genHTML(data,1))
 	"""
 
 # ╔═╡ 7041c49f-9d21-433c-b924-0bce56151ff6
 htl"""
-	$(genHTML(data,width,height,2))
+	$(genHTML(data,2))
 	"""
 
 # ╔═╡ c2ecefe9-f619-4633-8b0c-b414cf1b0f3e
 htl"""
-	$(genHTML(data,width,height,3))
+	$(genHTML(data,3))
 	"""
 
 # ╔═╡ 6dca7ba4-136d-4b15-b99c-36969817cf4c
 htl"""
-	$(genHTML(data,width,height,4))
+	$(genHTML(data,4))
 	"""
 
 # ╔═╡ ffc94ad9-1bfa-442b-857c-fda1a8d888a3
 htl"""
-	$(genHTML(data,width,height,5))
+	$(genHTML(data,5))
 	"""
 
 # ╔═╡ 356cc4ad-efe4-4476-810e-54f830738e65
 htl"""
-	$(genHTML(data,width,height,6))
+	$(genHTML(data,6))
 	"""
 
 # ╔═╡ a7281802-efb9-4d88-936b-a63175aae959
 htl"""
-	$(genHTML(data,width,height,7))
+	$(genHTML(data,7))
 	"""
 
 # ╔═╡ fa82b91c-64a5-4a8c-a59c-994c598d96ad
 htl"""
-	$(genHTML(data,width,height,8))
+	$(genHTML(data,8))
 	"""
 
 # ╔═╡ 1d65df6f-6ff2-4074-90fc-ce777a024d64
 htl"""
-	$(genHTML(data,width,height,9))
+	$(genHTML(data,9))
 	"""
 
 # ╔═╡ Cell order:
 # ╟─62dbc6d2-eda7-4696-b7c6-f5a7f0e7b252
 # ╟─7f2b3abb-074c-4c2c-9340-3363d6d265c7
-# ╠═ebdf845c-ed6c-4e81-8daf-b546c2b76e75
+# ╟─ebdf845c-ed6c-4e81-8daf-b546c2b76e75
 # ╟─ce1b567a-e944-4dc6-a489-b811dc10de4e
-# ╠═efc174e1-9e24-4071-aa4d-1763be219128
+# ╟─efc174e1-9e24-4071-aa4d-1763be219128
 # ╟─1bfb38f3-dcaf-49a4-82a6-7fce6bfb8177
-# ╠═7041c49f-9d21-433c-b924-0bce56151ff6
+# ╟─7041c49f-9d21-433c-b924-0bce56151ff6
 # ╟─4b9c9166-7a2a-4e49-81fe-88909778c621
-# ╠═c2ecefe9-f619-4633-8b0c-b414cf1b0f3e
+# ╟─c2ecefe9-f619-4633-8b0c-b414cf1b0f3e
 # ╟─cdcbf0ff-6dec-412a-a5dd-999dab5d4965
-# ╠═6dca7ba4-136d-4b15-b99c-36969817cf4c
+# ╟─6dca7ba4-136d-4b15-b99c-36969817cf4c
 # ╟─938dd6cf-1ed0-44a8-a73a-f911788e200c
-# ╠═ffc94ad9-1bfa-442b-857c-fda1a8d888a3
+# ╟─ffc94ad9-1bfa-442b-857c-fda1a8d888a3
 # ╟─5981046a-84dd-426a-8fdd-550784364aff
-# ╠═356cc4ad-efe4-4476-810e-54f830738e65
+# ╟─356cc4ad-efe4-4476-810e-54f830738e65
 # ╟─5fbbd8b2-28d8-4cee-8380-4bb274fd55cf
-# ╠═a7281802-efb9-4d88-936b-a63175aae959
+# ╟─a7281802-efb9-4d88-936b-a63175aae959
 # ╟─2a74a4e8-9355-4d20-b41b-536765aeeba1
-# ╠═fa82b91c-64a5-4a8c-a59c-994c598d96ad
+# ╟─fa82b91c-64a5-4a8c-a59c-994c598d96ad
 # ╟─5d1f0be1-844f-4cef-bdbd-c343af4116bd
-# ╠═1d65df6f-6ff2-4074-90fc-ce777a024d64
+# ╟─1d65df6f-6ff2-4074-90fc-ce777a024d64
 # ╟─04efa7a2-f585-422b-96c5-0c11ceec3886
 # ╟─aa4a54a2-89e2-4265-b81a-779bb36fc08a
 # ╟─b4df5d67-1184-40b2-8557-64e39f3a59ac
 # ╟─6021134f-f508-4c9b-ba84-e048ba6a5cba
 # ╟─e6726386-5c9d-4f08-9ec9-e78fa108e39b
 # ╟─3f52af75-c390-4423-9b52-a52c81791c92
-# ╟─bf80d570-db90-4e25-837e-53df9f069b74
+# ╠═bf80d570-db90-4e25-837e-53df9f069b74
 # ╟─0606bc8c-5132-4b17-8348-2b0358650041
 # ╟─592b0ca4-213b-41ab-8edf-1569ddd62ae8
 # ╟─3e3c456e-8c13-4a0f-bf9c-e77de553d526
-# ╠═e1b9d106-0c86-4530-9a13-d5d01502026e
+# ╟─e1b9d106-0c86-4530-9a13-d5d01502026e
