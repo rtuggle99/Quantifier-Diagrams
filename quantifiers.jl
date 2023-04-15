@@ -100,11 +100,11 @@ main {
 """
 
 # ╔═╡ b4df5d67-1184-40b2-8557-64e39f3a59ac
-function plotHiddenTruthVals(data,gridnumber,exprnum)
+function plotHiddenTruthVals(data,gridnumber,exprnum,width,upperBuffer)
 	marks = []
 	for i in 1:3
-			cx = 57 + 40*(i - 1)
-			cy = 25
+			cx = width/2 - 43 + 40*(i - 1)
+			cy = (2/3)*upperBuffer - 10
 			scale = .5
 
 
@@ -117,8 +117,8 @@ function plotHiddenTruthVals(data,gridnumber,exprnum)
 	end
 
 	for i in 1:2
-			cx = 78 + 40*(i - 1)
-			cy = 20
+			cx = width/2 - 43 + 40*(i - 1) + 20
+			cy = (2/3)*upperBuffer - 20
 			scale = .25
 
 
@@ -148,7 +148,7 @@ function plotDominatingLines(data,gridnumber,exprnum,width,height,shapeWidth,xbu
 end
 
 # ╔═╡ e6726386-5c9d-4f08-9ec9-e78fa108e39b
-function plotHiddenXsandChecks(data,gridnumber,exprnum,width,height,shapeWidth,xbuffer,ybuffer,xtick,ytick,xspaceBefore,yspaceAfter)
+function plotHiddenXsandChecks(data,gridnumber,exprnum,width,height,shapeWidth,xbuffer,ybuffer,xtick,ytick,xspaceBefore,yspaceAfter,upperBuffer)
 	marks = []
 	for i in 1:size(data[:y])[1]
 			cx = xbuffer + xspaceBefore - shapeWidth/2 + shapeWidth*(i - 1)
@@ -176,8 +176,8 @@ function plotHiddenXsandChecks(data,gridnumber,exprnum,width,height,shapeWidth,x
 			append!(marks,[smallx])
 			append!(marks,[placeholder])
 	end
-	cx = 100
-	cy = 20
+	cx = width/2
+	cy = upperBuffer-shapeWidth
 	scale=1
 	bigCheck = @htl("""<polygon id="bigcheckmark $exprnum,$gridnumber" points="$(cx) $(cy),$(cx-scale*5) $(cy-scale*5),$(cx-scale*10) $(cy),$(cx) $(cy+scale*10),$(cx+scale*15) $(cy-scale*15),$(cx+scale*10) $(cy-scale*20)"  style=" visibility:hidden; fill: lightgreen; stroke:green; stroke-width:1"/>""")
 
@@ -832,6 +832,7 @@ function genHTML(data,exprnum)
 		##maxx is the biggest x value that we have in our data
 		maxx = size(data[i][:y])[1] - 1
 
+		##theoretecally adding invisible data points that don't do anything except pad the number of vertical lines inside the grid. Looks nicer with the extra space like this
 		if (mod(maxx,3) == 0)
 			extraXshapes = mod(maxx,3)
 		else
@@ -843,6 +844,7 @@ function genHTML(data,exprnum)
 		##maxy is the biggest y value that we have in our data
 		maxy = maximum(data[i][:y])
 
+		##theoretecally adding invisible data points that don't do anything except pad the number of horizontal lines inside the grid. Looks nicer with the extra space like this
 		if (mod(maxy,3) == 0)
 			extraYshapes = 3-mod(maxy,3)
 		else
@@ -861,9 +863,9 @@ function genHTML(data,exprnum)
 		##the svgs for the data points
 		bigDots = plotPoints(data[i],i,exprnum,width,height,shapeWidth,xbuffer,ybuffer,maxx,maxy,xspaceBefore,yspaceAfter)
 		##the svgs for the checks and x's corresponding to each data point, as well as the check and x above the grid
-		checksx = plotHiddenXsandChecks(data[i],i,exprnum,width,height,shapeWidth,xbuffer,ybuffer,maxx,maxy,xspaceBefore,yspaceAfter)
+		checksx = plotHiddenXsandChecks(data[i],i,exprnum,width,height,shapeWidth,xbuffer,ybuffer,maxx,maxy,xspaceBefore,yspaceAfter,upperBuffer)
 		##the svgs for the big and little trues and falses above the grid
-		TFs = plotHiddenTruthVals(data[i],i,exprnum)
+		TFs = plotHiddenTruthVals(data[i],i,exprnum,width,upperBuffer)
 		##the svgs for the dominating lines corresponding to each data point
 		dom = plotDominatingLines(data[i],i,exprnum,width,height,shapeWidth,xbuffer,ybuffer,maxx,maxy,xspaceBefore,yspaceAfter,upperBuffer)
 		##the grid itself with axes and labels
@@ -965,7 +967,7 @@ htl"""
 # ╟─6021134f-f508-4c9b-ba84-e048ba6a5cba
 # ╟─e6726386-5c9d-4f08-9ec9-e78fa108e39b
 # ╟─3f52af75-c390-4423-9b52-a52c81791c92
-# ╠═bf80d570-db90-4e25-837e-53df9f069b74
+# ╟─bf80d570-db90-4e25-837e-53df9f069b74
 # ╟─0606bc8c-5132-4b17-8348-2b0358650041
 # ╟─592b0ca4-213b-41ab-8edf-1569ddd62ae8
 # ╟─3e3c456e-8c13-4a0f-bf9c-e77de553d526
